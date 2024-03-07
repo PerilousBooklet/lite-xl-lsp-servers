@@ -269,6 +269,34 @@
     ],
     "dependencies": { "language_ts": {}, "language_js": {}, "lsp": {}, "nodejs": {} }
   },{
+    "id": "lsp_xml",
+    "description": "LSP support for XML via lemminx.",
+    "path": "plugins/lsp_xml.lua",
+    "version": "0.11.0",
+    "files": [
+      {
+        "url": "",
+        "arch": "x86_64-linux",
+        "checksum": "",
+      },
+      {
+        "url": "z",
+        "arch": "aarch64-darwin",
+        "checksum": "",
+      },
+      {
+        "url": "",
+        "arch": "x86_64-darwin",
+        "checksum": "",
+      },
+      {
+        "url": ",
+        "arch": "x86_64-windows",
+        "checksum": "",
+      }
+    ],
+    "dependencies": { "language_xml": {}, "lsp": {}, "jdk": {} }
+  },{
     "id": "lsp_zig",
     "description": "LSP support for Zig via zls.",
     "path": "plugins/lsp_zig.lua",
