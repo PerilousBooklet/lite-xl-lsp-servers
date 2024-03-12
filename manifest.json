@@ -71,6 +71,34 @@
     ],
     "dependencies": { "language_lua": {}, "lsp": {} }
   },{
+    "id": "lsp_nim",
+    "description": "LSP support for Nim via nimlangserver.",
+    "path": "plugins/lsp_nim.lua",
+    "version": "1.2.0",
+    "files": [
+      {
+        "url": "https://github.com/nim-lang/langserver/releases/download/v1.2.0/nimlangserver-1.2.0-linux-amd64.tar.gz",
+        "arch": "x86_64-linux",
+        "checksum": "dd5b2e7ba735242949d32bdfc6a4cdca47e342156d84aabbe446d2f1016f5176"
+      },
+      {
+        "url": "https://github.com/nim-lang/langserver/releases/download/v1.2.0/nimlangserver-1.2.0-macos-arm64.zip",
+        "arch": "aarch64-darwin",
+        "checksum": "5c31d6e24aa67e72dfe4ee5e19e7dbf3bbfcf244b65ef91e87fad4e786c0788f"
+      },
+      {
+        "url": "https://github.com/nim-lang/langserver/releases/download/v1.2.0/nimlangserver-1.2.0-macos-amd64.zip",
+        "arch": "x86_64-darwin",
+        "checksum": "ad6b75c0028d6857046f21a02c643424af94b56c82847af07a47e30762659c2b"
+      },
+      {
+        "url": "https://github.com/nim-lang/langserver/releases/download/v1.2.0/nimlangserver-1.2.0-windows-amd64.zip",
+        "arch": "x86_64-windows",
+        "checksum": "d13f4cf0ce519e6f6ad914fb0cadfa293d6259a20d55e33a91acd38246f99f24"
+      }
+    ],
+    "dependencies": { "language_nim": {}, "lsp": {} }
+  },{
     "id": "jdk",
     "description": "Production and Early-Access OpenJDK Builds, from Oracle.",
     "version": "21.0.2",
