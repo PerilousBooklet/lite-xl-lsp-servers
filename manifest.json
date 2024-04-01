@@ -43,6 +43,18 @@
       "lsp": {}, "nodejs": {}
     }
   },{
+    "id": "lsp_html",
+    "description": "LSP support for HTML via vscode-html-languageserver.",
+    "path": "plugins/lsp_html.lua",
+    "version": "1.87.2",
+    "files": [
+      {
+        "url": "https://github.com/lite-xl/lite-xl-lsp-servers/releases/download/vscode-html-languageserver-1.87.2/vscode-html-languageserver-1.87.2.tar.gz",
+        "checksum": ""
+      }
+    ],
+    "dependencies": { "language_html": {}, "lsp": {}, "nodejs": {} }
+  },{
     "id": "lsp_json",
     "description": "LSP support for JSON via vscode-json-languageserver with [additional patches](patches/vscode-json-languageserver) for increased functionality.",
     "path": "plugins/lsp_json.lua",

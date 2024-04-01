@@ -1,0 +1,46 @@
+name: Package vscode-html-languageserver
+
+on:
+  workflow_dispatch:
+    inputs:
+      vscode-html-languageserver_version:
+        type: string
+        required: true
+
+jobs:
+  package_all:
+    name: Package HTML Language Server
+    runs-on: ubuntu-latest
+    permissions: write-all
+    env:
+      VERSION: ${{ inputs.vscode-html-languageserver_version }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Update Packages
+        run: sudo apt-get update -y
+      - name: Install Dependencies
+        run: sudo apt-get install -y npm nodejs
+      - name: Get vscode
+        run: |
+          curl -L -o "v${VERSION}.tar.gz" "https://github.com/microsoft/vscode/archive/refs/tags/${VERSION}.tar.gz"
+      - name: Build vscode-html-languageserver
+        run: |
+          tar -xzvf "v${VERSION}.tar.gz"
+          git apply --directory=vscode-${VERSION} patches/vscode-html-languageserver/*.patch --verbose
+          cd "vscode-${VERSION}/extensions/html-language-features/server"
+          npm i --legacy-peer-deps @vercel/ncc typescript
+          # replace /umd/ with /esm/ in some require paths,
+          # as /umd/ files don't seem to get picked up by ncc
+          sed -i 's/\/umd\//\/esm\//g' node_modules/vscode-html-languageservice/package.json
+          npx ncc build src/node/htmlServerNodeMain.ts --license LICENSES
+      - name: Package
+        run: |
+          mkdir bundle
+          cp -r vscode-${VERSION}/LICENSE.txt vscode-${VERSION}/extensions/html-language-features/server/dist bundle
+          mv bundle vscode-html-languageserver
+          tar -zcvf vscode-html-languageserver.tar.gz vscode-html-languageserver
+      - name: Create Release
+        env: { GITHUB_TOKEN: "${{ github.token }}" }
+        run: |
+          gh release delete -y "vscode-html-languageserver" || true
+          gh release create -t "vscode-html-languageserver" "vscode-html-languageserver" "vscode-html-languageserver.tar.gz"
