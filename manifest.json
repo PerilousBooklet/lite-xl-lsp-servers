@@ -315,6 +315,19 @@
     ],
     "dependencies": { "language_java": {}, "lsp": {}, "jdk": {} }
   },{
+    "id": "lsp_kotlin",
+    "description": "Automatic configuration/binary download for LSP completion for Kotlin with kotlin-language-server.",
+    "path": "plugins/lsp_kotlin.lua",
+    "version": "1.49.0",
+    "mod_version": "3",
+    "files": [
+      {
+        "url": "",
+        "checksum": ""
+      }
+    ],
+    "dependencies": { "language_java": {}, "lsp": {}, "jdk": {} }
+  },{
     "id": "nodejs",
     "description": "Official NodeJs builds.",
     "version": "22.18.0",
