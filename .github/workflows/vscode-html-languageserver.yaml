@@ -3,44 +3,72 @@ name: Package vscode-html-languageserver
 on:
   workflow_dispatch:
     inputs:
-      vscode-html-languageserver_version:
+      vscode_version:
+        description: 'VS Code version (e.g., 1.85.0)'
         type: string
         required: true
+      patches_version:
+        description: 'Patch version'
+        type: string
+        required: true
+        default: '1'
 
 jobs:
-  package_all:
+  package_html_server:
     name: Package HTML Language Server
     runs-on: ubuntu-latest
     permissions: write-all
     env:
-      VERSION: ${{ inputs.vscode-html-languageserver_version }}
+      VERSION: ${{ inputs.vscode_version }}
+      PATCHED_VERSION: ${{ inputs.vscode_version }}-patch-${{ inputs.patches_version }}
+    
     steps:
-      - uses: actions/checkout@v3
-      - name: Update Packages
-        run: sudo apt-get update -y
-      - name: Install Dependencies
-        run: sudo apt-get install -y npm nodejs
-      - name: Get vscode
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Download VS Code Source
         run: |
           curl -L -o "v${VERSION}.tar.gz" "https://github.com/microsoft/vscode/archive/refs/tags/${VERSION}.tar.gz"
-      - name: Build vscode-html-languageserver
+          tar -xzf "v${VERSION}.tar.gz"
+
+      - name: Build Server
         run: |
-          tar -xzvf "v${VERSION}.tar.gz"
-          git apply --directory=vscode-${VERSION} patches/vscode-html-languageserver/*.patch --verbose
+          # Navigate to the HTML language server directory
           cd "vscode-${VERSION}/extensions/html-language-features/server"
-          npm i --legacy-peer-deps @vercel/ncc typescript
-          # replace /umd/ with /esm/ in some require paths,
-          # as /umd/ files don't seem to get picked up by ncc
-          sed -i 's/\/umd\//\/esm\//g' node_modules/vscode-html-languageservice/package.json
-          npx ncc build src/node/htmlServerNodeMain.ts --license LICENSES
-      - name: Package
+          
+          # Install build tools
+          npm install @vercel/ncc typescript
+          
+          # Fix: Use ESM paths if NCC struggles with UMD (similar to your JSON fix)
+          if [ -f "node_modules/vscode-html-languageservice/package.json" ]; then
+            sed -i 's/\/umd\//\/esm\//g' node_modules/vscode-html-languageservice/package.json
+          fi
+
+          # Build into a single file
+          # The entry point for HTML is usually htmlServerMain.ts
+          npx ncc build src/node/htmlServerNodeMain.ts --out dist --license LICENSES
+
+      - name: Bundle and Compress
         run: |
-          mkdir bundle
-          cp -r vscode-${VERSION}/LICENSE.txt vscode-${VERSION}/extensions/html-language-features/server/dist bundle
-          mv bundle vscode-html-languageserver
-          tar -zcvf vscode-html-languageserver.tar.gz vscode-html-languageserver
+          mkdir -p bundle/vscode-html-languageserver
+          
+          # Copy the built JS and License
+          cp -r vscode-${VERSION}/extensions/html-language-features/server/dist/* bundle/vscode-html-languageserver/
+          cp vscode-${VERSION}/LICENSE.txt bundle/vscode-html-languageserver/
+          
+          cd bundle
+          tar -zcvf ../vscode-html-languageserver-${PATCHED_VERSION}.tar.gz vscode-html-languageserver
+
       - name: Create Release
-        env: { GITHUB_TOKEN: "${{ github.token }}" }
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release delete -y "vscode-html-languageserver" || true
-          gh release create -t "vscode-html-languageserver" "vscode-html-languageserver" "vscode-html-languageserver.tar.gz"
+          TAG="html-server-${PATCHED_VERSION}"
+          gh release delete "$TAG" -y || true
+          gh release create "$TAG" "vscode-html-languageserver-${PATCHED_VERSION}.tar.gz" \
+            --title "HTML Language Server ${PATCHED_VERSION}" \
+            --notes "Standalone build of vscode-html-languageserver from VS Code version ${VERSION}"
